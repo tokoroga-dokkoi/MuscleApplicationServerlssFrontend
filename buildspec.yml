@@ -20,10 +20,12 @@ phases:
       - echo Archibe node module started
       - tar cf /tmp/node_modules.tar node_modules
       - echo Archibe node module completed
-  artifacts:
-    files:
-      - '**/*'
-    base-directory: dist
-  cache:
-      paths:
-        - /tmp/node_modules.tar
+      - echo Clear CloudFrontCache started
+      - aws cloudfront create-invalidation --ditribution-id ${CLOUDFRONT_DISTRIBUTION_ID} --paths '/*'
+artifacts:
+  files:
+    - '**/*'
+  base-directory: dist
+cache:
+    paths:
+      - /tmp/node_modules.tar
