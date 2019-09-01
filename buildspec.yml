@@ -2,6 +2,8 @@ version: 0.2
 
 phases:
   install:
+    runtimeversions:
+      nodejs: 10
     commands:
       # Cache File unarchibe
       - if [ -e /tmp/node_modules.tar ]; then tar xf /tmp/node_modules.tar; fi
