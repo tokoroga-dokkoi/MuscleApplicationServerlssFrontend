@@ -23,7 +23,6 @@ phases:
       - tar cf /tmp/node_modules.tar node_modules
       - echo Archibe node module completed
       - echo Clear CloudFrontCache started
-      - aws cloudfront create-invalidation --ditribution-id ${CLOUDFRONT_DISTRIBUTION_ID} --paths '/*'
 artifacts:
   files:
     - '**/*'
