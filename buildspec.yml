@@ -2,7 +2,7 @@ version: 0.2
 
 phases:
   install:
-    runtimeversions:
+    runtime-versions:
       nodejs: 10
     commands:
       # Cache File unarchibe
