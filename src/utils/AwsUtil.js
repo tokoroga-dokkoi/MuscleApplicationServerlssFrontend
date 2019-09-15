@@ -19,7 +19,8 @@ Amplify.configure({
         endpoints: [
             {
                 name: 'MuscleApi',
-                endpoint: process.env.VUE_APP_API_GATEWAY_BASE_URL
+                endpoint: "http://localhost:3000"
+                //endpoint: process.env.VUE_APP_API_GATEWAY_BASE_URL
             }
         ]
     }
@@ -43,8 +44,8 @@ export function signIn(username, password){
     });
 }
 
-export function CurrentSession(){
-    return Auth.currentSession()
+export function CurrentUser(){
+    return Auth.currentAuthenticatedUser()
 }
 
 export function signOut(){
@@ -52,13 +53,36 @@ export function signOut(){
 }
 
 export async function getAPI(apiName, path){
+    if(apiName === ''){
+        apiName = 'MuscleApi'
+    }
     const user = await Auth.currentAuthenticatedUser()
     const token = user.signInUserSession.idToken.jwtToken
     const headers = {
         Authorization: token
     }
-    console.log(path)
     return API.get(apiName, path, {
         headers: headers
-    })
+    })    
 }
+
+export async function postAPI(apiName, path, payload){
+    if(apiName === ''){
+        apiName = 'MuscleApi'
+    }
+    // header and payload
+    const user  = await Auth.currentAuthenticatedUser()
+    console.log(user)
+    const id_token = user.signInUserSession.idToken.jwtToken
+    const headers = {
+        Authorization: id_token,
+    }
+    const http_data = {
+        headers: headers,
+        body: payload
+    }
+    console.log(http_data)
+    return API.post(apiName, path, http_data)
+}
+
+// Non export Function

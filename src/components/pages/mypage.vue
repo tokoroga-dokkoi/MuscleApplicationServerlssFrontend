@@ -18,10 +18,10 @@
             <openDialog :dialog="completeDialog" @close="closeForm">
                 <taskCompleteForm slot="content" :todo="todo" @complete="afterComplete($event, todo)" @close="closeForm"></taskCompleteForm>
             </openDialog>
-            <myDataTable :headers="headers" :items="todos" @edit="editForm($event, todo)" @delete="deleteConfirm($event, todo)" @complete="completeTodo($event,todo)"></myDataTable>
+            <myDataTable :headers="headers" :todos="todos" @edit="editForm($event, todo)" @delete="deleteConfirm($event, todo)" @complete="completeTodo($event,todo)"></myDataTable>
             <v-layout align-center justify-center row>
                 <v-flex xs6>
-                    <myPieGraph ref="graph" :dataset="dataSet" :datalabel="dataLabel"></myPieGraph>
+                    <myPieGraph ref="graph" :dataset="pieData"></myPieGraph>
                 </v-flex>
                 <v-flex xs6>
                     <myCompleteGraph ref="completegraph" :dataset="lineData"></myCompleteGraph>
@@ -93,6 +93,12 @@ export default {
                 text: "完了予定日",
                 sortable: true,
                 value: "clear_plan"
+            },
+            {
+                text: "操作",
+                align: 'center',
+                sortable: false,
+                value: 'action'
             }
         ],
         todos: [{
@@ -112,8 +118,7 @@ export default {
             clear_plan: "",
             clear_data: ""
         }],
-        dataSet: [],
-        dataLabel: [],
+        pieData: {},
         lineData: {},
         training_name: "",
         isLoading: false,
@@ -142,24 +147,18 @@ export default {
             console.log(response.data)
             this.todos = response.data["not_complete"]
             this.completeTodos = response.data["complete"]
+            //グラフ描画
+            const pie_data  = response.data["pie"]
+            const line_data = response.data["line"]
+            // 円グラフ描画
+            this.pieData    = Object.assign({}, pie_data)
+            //折れ線グラフ
+            this.lineData   = Object.assign({}, line_data)
         }, (error) => {
+            console.log(error)
             this.$store.commit('message/setMessage', {"message":"Todoの取得に失敗しました", "type":"error"}, {root: true})
         })
     },
-   mounted() {
-        //  Graph描画データを取得
-        request.get(`${this.base_url}/api/v1/graph`, options).then( (response) => {
-            // 円グラフ描画
-            const graph_datasets = response.data["pie_data"]
-            this.dataSet         = Object.values(graph_datasets)
-            this.dataLabel       = Object.keys(graph_datasets)
-            //this.$refs.graph.trimLabelData(this.dataSet, this.dataLabel)
-            //折れ線グラフ描画
-            this.lineData        = Object.assign({}, response.data["line_data"])
-        }, (error) => {
-            this.graphData = {}
-        })
-    }, 
     components: {
         "openDialog": Dialog,
         "taskRegisterForm": TaskRegisterForm,
@@ -188,7 +187,16 @@ export default {
         createDataTable(todos){
             this.todos = todos
         },
+        createLineData(datas){
+            const line_data_object = {}
+            for(let i = 0, l = datas.length; i < l; i += 1){
+                const data = datas[i]
+                line_data_object[Object.keys(data)[0]] = Object.values(data)[0]
+            }
+            return line_data_object
+        },
         appendTodo(todo){
+            console.log(todo)
             this.todos.push(todo)
         },
         updateTodo(todo){

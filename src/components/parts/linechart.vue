@@ -1,6 +1,6 @@
 <script>
 import { Line } from 'vue-chartjs'
-
+import * as moment from 'moment'
 export default {
     extends: Line,
     props: {
@@ -57,12 +57,12 @@ export default {
     },
     created() {
         //labelを直近1ヶ月で設定
-        const day_array       = []
-        const start_today     = new Date()
-        var   end_a_month_ago = new Date()
-        end_a_month_ago.setMonth(end_a_month_ago.getMonth() - 1)
+        const day_array = []
+        const today     = new Date()
+        let   start_day = new Date()
+        start_day.setMonth(today.getMonth() - 1)
         //繰り返し
-        for(var day = start_today; day < end_a_month_ago; day.setDate(day.getDate() + 1)){
+        for(let day = start_day; day < today; day.setDate(day.getDate() + 1)){
             const format_date = `${day.getFullYear()}-${day.getMonth()}-${day.getDate()}`
             day_array.push(format_date)
         }
@@ -82,8 +82,9 @@ export default {
             this.renderChart(this.chartData, this.options)
         },
         formatDate(non_format_date){
-            const date = new Date(non_format_date.substr(0,10))
-            return date.toISOString()
+            const date    = new Date(non_format_date)
+            const dateISO = moment(date.toISOString()).format('YYYY-MM-DD')
+            //return date.toISOString().format()
         }
     },
     watch: {

@@ -5,7 +5,7 @@
         </v-card-title>
         <v-card-text>
             <v-container grid-list-md>
-                <v-form ref="form" v-model="valid" lazy-validation>
+                <v-form ref="form" v-model="valid" :lazy-validation="lazy">
                     <v-layout wrap>
                         <v-flex xs12>
                             <MyTextField
@@ -36,8 +36,8 @@
                             </MyDateField>
                         </v-flex>
                     </v-layout>
-                    <v-btn medium color="primary" @click="taskRegist">登録</v-btn>
-                    <v-btn medium color="primary" @click="close">閉じる</v-btn>
+                    <v-btn medium color="primary" :disable="!valid" @click="taskRegist" class="mr-2">登録</v-btn>
+                    <v-btn medium color="primary" @click="close" class="ml-2">閉じる</v-btn>
                 </v-form>
             </v-container>
         </v-card-text>
@@ -46,13 +46,14 @@
 <script>
 import MyTextField from "../parts/formInputText"
 import MyDateField from "../parts/formDate"
-import request from '../../utils/request'
+import * as AwsUtil from "../../utils/AwsUtil"
 import store from '../../store/store'
 
 export default {
     props: ["todo", "editFlg"],
     data: () => ({
         valid: true,
+        lazy: false,
         name: "",
         weight: 0,
         set: 0,
@@ -82,36 +83,51 @@ export default {
         'MyDateField': MyDateField
     },
     methods: {
-        taskRegist(){
-            console.log(this.todo.complete_plan_date)
-            // editFlgから判断
-            const options = {
-                params: {
-                    todo:{
-                        name: this.todo.name,
-                        weight: this.todo.weight,
-                        set: this.todo.set,
-                        complete_plan_date: this.todo.complete_plan_date
-                    }
-                },
-                auth: true
+        async taskRegist(){
+            //入力項目検査
+            if (!this.$refs.form.validate()){
+                return
+            }
+            this.snackbar = true
+            // ユーザ情報を取得
+            let user_name = ''
+            let access_token = ''
+            await AwsUtil.CurrentUser().then( (response) => {
+                user_name    = response["username"]
+                access_token = response.signInUserSession.accessToken.jwtToken
+            }, (error) => {
+                this.$store.commit('message/setMessage', {'message': '登録に失敗しました','type': 'error'}, {root: true})
+                this.close()
+                return
+            })
+            const body = {
+                access_token: access_token,
+                user_name: user_name,
+                name: this.todo.name,
+                weight: this.todo.weight,
+                set: this.todo.set,
+                clear_plan: this.todo.complete_plan_date
             }
             if(this.editFlg === -1){
-                this.newTask(options)
+                this.newTask(body)
             }else{
-                this.updateTask(options)
+                this.updateTask(body)
             }
         },
-        newTask(options){
-            //request
-            request.post('/api/v1/todo', options).then( (response) => {
-                this.$store.commit('message/setMessage', {'message': '登録が完了しました'}, {root: true})
-                this.$emit("append", response.data)
+        async newTask(body){
+            //requestUrl
+            const path = '/todos'
+            try{
+                await AwsUtil.postAPI('',path, body).then((response) => {
+                    this.$store.commit('message/setMessage', {'message': '登録が完了しました'}, {root: true})
+                    this.$emit("append", response["item"])
+                })
+            } catch(e){
+                console.log(e)
+                this.$store.commit('message/setMessage', {'message': '登録に失敗しました', 'type': 'error'}, {root: true})
+            }finally{
                 this.close()
-            }, (error) => {
-                this.$store.commit('message/setMessage', {'message': '登録が失敗しました', 'type':'error'}, {root: true})
-                this.close()
-            })
+            }
         },
         updateTask(options){
             //request
@@ -119,10 +135,8 @@ export default {
                 //更新内容を適用する
                 this.$store.commit('message/setMessage', {'message': '更新が完了しました'}, {root: true})
                 this.$emit("update", response.data)
-                this.close()
             }, (error) => {
                 this.$store.commit('message/setMessage', {'message': '更新に失敗しました', 'type': 'error'}, {root: true})
-                this.close()
             })
         },
         close(){

@@ -1,49 +1,55 @@
 <template>
-    <div>
-        <v-data-table
-            :headers="headers"
-            :items="items"
-            class="elevation-1"
-        >
-            <template v-slot:items="props">
-                <td> {{props.item.name}} </td>
-                <td class="text-xs-right">{{props.item.weight}}</td>
-                <td class="text-xs-right">{{props.item.set}}</td>
-                <td class="text-xs-right">{{props.item.created_at}}</td>
-                <td class="text-xs-right">{{props.item.clear_plan}}</td>
-                <td class="justify-center layout px-0">
-                    <v-icon
-                        small
-                        class="mr-2"
-                        @click="completeItem(props.item)"
-                    >
-                        done
-                    </v-icon>
-                    <v-icon
-                        small
-                        class="mr-2"
-                        @click="editItem(props.item)"
-                    >
-                    edit
-                    </v-icon>
-                    <v-icon
-                        small
-                        class="mr-2"
-                        @click="deleteItem(props.item)"
-                    >
-                    delete
-                    </v-icon>
-                </td>
-            </template>
-        </v-data-table>
-    </div>
+    <v-data-table
+        :headers="headers"
+        :items="items"
+        class="elevation-1"
+    >
+        <template v-slot:items="props">
+            <td> {{props.item.name}} </td>
+            <td class="text-xs-right">{{props.item.weight}}</td>
+            <td class="text-xs-right">{{props.item.set}}</td>
+            <td class="text-xs-right">{{props.item.created_at}}</td>
+            <td class="text-xs-right">{{props.item.clear_plan}}</td>
+            <td>
+                <v-icon
+                    small
+                    class="mr-2"
+                    @click="completeItem(props.item)"
+                >
+                    mdi-clipboard-check
+                </v-icon>
+                <v-icon
+                    small
+                    class="mr-2"
+                    @click="editItem(props.item)"
+                >
+                    mdi-tooltip-edit
+                </v-icon>
+                <v-icon
+                    small
+                    class="mr-2"
+                    @click="deleteItem(props.item)"
+                >
+                    mdi-delete
+                </v-icon>
+            </td>
+        </template>
+        <div>
+            <v-icon>
+                mdi-home
+            </v-icon>
+        </div>
+    </v-data-table>
 </template>
 <script>
 export default {
     props: {
         headers: Array,
-        items: Array
+        todos: Array
     },
+    data: () => ({
+        items: []
+    }),
     methods: {
         editItem: function(item){
             const index = this.items.indexOf(item)
@@ -58,12 +64,13 @@ export default {
             this.$emit("complete", {"todo":item, "index": index})
         },
         convertDateFormat(){
-            for(let i = 0; i < this.items.length; i++){
-                const non_format_clear_date  = parseInt(this.items[i]["clear_plan"],10)
-                this.items[i]["clear_plan"]  = this.dateFormat(non_format_clear_date)
-                const non_format_create_date = parseInt(this.items[i]["created_at"],10)
-                this.items[i]["created_at"]  = this.dateFormat(non_format_create_date)
-                console.log(this.items[i])
+            for(let i = this.items.length; i < this.todos.length; i++){
+                const non_format_clear_date  = parseInt(this.todos[i]["clear_plan"],10)
+                const non_format_create_date = parseInt(this.todos[i]["created_at"],10)
+                const item = Object.assign({}, this.todos[i])
+                item["clear_plan"] = this.dateFormat(non_format_clear_date)
+                item["created_at"] = this.dateFormat(non_format_create_date)
+                this.items.push(item)
             }
         },
         dateFormat(non_format_date){
@@ -72,7 +79,7 @@ export default {
         }
     },
     watch: {
-        items: {
+        todos: {
             immediate: true,
             handler: 'convertDateFormat'
         }
