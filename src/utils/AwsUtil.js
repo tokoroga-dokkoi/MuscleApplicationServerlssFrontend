@@ -48,6 +48,24 @@ export function CurrentUser(){
     return Auth.currentAuthenticatedUser()
 }
 
+export function GetUserNameAccessToken(){
+    CurrentUser().then( (response) => {
+        user_name = response["username"]
+        access_token = response.signInUserSession.accessToken.jwtToken
+        user_data = {
+            "name": user_name,
+            "accessToken": access_token
+        }
+        return user_data
+    },(error) => {
+        user_data = {
+            "name": "",
+            "accessToken": ""
+        }
+        return user_data
+    })
+}
+
 export function signOut(){
     return Auth.signOut();
 }
@@ -72,7 +90,6 @@ export async function postAPI(apiName, path, payload){
     }
     // header and payload
     const user  = await Auth.currentAuthenticatedUser()
-    console.log(user)
     const id_token = user.signInUserSession.idToken.jwtToken
     const headers = {
         Authorization: id_token,
@@ -81,8 +98,23 @@ export async function postAPI(apiName, path, payload){
         headers: headers,
         body: payload
     }
-    console.log(http_data)
     return API.post(apiName, path, http_data)
+}
+
+export async function putAPI(path, payload){
+    const apiName = 'MuscleApi'
+    const user     = await Auth.currentAuthenticatedUser()
+    const id_token = user.signInUserSession.idToken.jwtToken
+    const headers = {
+        Authorization: id_token
+    }
+    const http_data = {
+        headers: headers,
+        body: payload
+    }
+
+    return API.put(apiName, path, http_data)
+
 }
 
 // Non export Function

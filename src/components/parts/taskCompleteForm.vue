@@ -6,7 +6,7 @@
             </v-card-title>
             <v-card-text>
                 <v-container grid-list-md>
-                    <v-form ref="form" v-model="valid" lazy-validation>
+                    <v-form ref="form" v-model="valid" :lazy-validation="lazy">
                         <v-layout wrap>
                             <v-flex xs12>
                                 <v-text-field
@@ -31,7 +31,7 @@
                                 </v-text-field>
 
                                 <MyDateField
-                                    v-model="todo.complete_plan_date"
+                                    v-model="clear_date"
                                     label="完了日"
                                 >
                                 </MyDateField>
@@ -55,13 +55,15 @@
 <script>
 import MyTextField from "../parts/formInputText"
 import MyDateField from "../parts/formDate"
-import request from '../../utils/request'
+import * as AwsUtil from "../../utils/AwsUtil"
 import store from '../../store/store'
 export default {
     props: ["todo"],
     data: () => ({
         valid: true,
+        lazy: false,
         comment: "ToDoを完了しました!!",
+        clear_date: "",
         formInfo: {
             taskCommentRules: [
                 v => (v && v.length <= 50) || "50文字以内で入力してください"
@@ -70,28 +72,37 @@ export default {
     }),
     methods: {
         taskComplete(){
-            const options = {
-                auth: true,
-                params: {
-                    todo: {
-                        comment: this.comment,
-                        clear_date: this.todo.complete_plan_date
-                    },
-                }
+            // validate
+            if(!this.$refs.form.validate()){
+                return
             }
-
-            request.patch(`/api/v1/todo/${this.todo.todo_id}/complete`, options).then( (response) => {
-                this.$store.commit('message/setMessage', {'message': 'ToDoを完了しました'}, {root: true})
-                this.$emit("complete", response.data)
-                this.close()
-            },(error) => {
-                if(error.response.status === 403){
-                    this.$store.commit('message/setMessage', {'message':'不正な操作です', 'type': 'error'}, {root: true})
-                }else{
-                    this.$store.commit('message/setMessage', {'message':'更新に失敗しました。やり直してください', 'type':'error'}, {root: true})
-                }
-                this.close()
-            })
+            this.snackbar=true
+            // 日付Check
+            if(this.clear_date === ""){
+                const today = new Date()
+                this.clear_date = `${today.getFullYear()}-${today.getMonth()+1}-${today.getDate()}`
+            }
+            // ユーザ情報を取得
+            const body = {
+                id: this.todo.id,
+                clear_date: this.clear_date,
+                comment: this.comment
+            }
+            // リクエスト
+            const path = `/todos/${this.todo.id}`
+            try{
+                AwsUtil.putAPI(path, body).then( (response) => {
+                    // メッセージ出力
+                    this.$store.commit('message/setMessage', {'message': 'ToDoを完了しました'}, {root: true})
+                    //入力データを渡す
+                    let complete_todo = Object.assign({},this.todo)
+                    complete_todo["clear_date"] = this.clear_date
+                    this.$emit("complete", complete_todo)
+                    this.close()
+                })
+            } catch(e){
+                this.$store.commit('message/setMessage', {'message': '完了処理に失敗しました。再度やり直してください', 'type':'error'}, {root: true})
+            }
         },
         close(){
             this.$emit("close")

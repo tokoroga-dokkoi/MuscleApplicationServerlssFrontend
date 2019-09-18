@@ -5,7 +5,7 @@ export default {
     extends: Line,
     props: {
         datasets: {
-            type: Object,
+            type: Array,
             required: false
         },
     },
@@ -71,6 +71,7 @@ export default {
         chartGraph(){
             console.log(`Data is ${this.isDataEmpty}`)
             if(this.isDataEmpty) return false
+            for(const item of this.datasets)
             for( const [key, value] of Object.entries(this.datasets) ) {
                 const format_date = this.formatDate(key)
                 if(value.weight){

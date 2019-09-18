@@ -7,6 +7,14 @@ export default {
         dataset: {
             type: Object,
             require: false,
+        },
+        label: {
+            Type: String,
+            require: false,
+        },
+        graphtitle: {
+            Type: String,
+            require: false
         }
     },
     data: () => ({
@@ -14,7 +22,7 @@ export default {
             labels: [],
             datasets: [
                 {
-                    label:"ToDo完了数",
+                    label: '',
                     data: [],
                     borderColor: "",
 
@@ -24,19 +32,9 @@ export default {
         options: {
             title: {
                 display: true,
-                text: "Todo数推移"
+                text: ''
             },
             scales: {
-                xAxes: [{
-                    type: 'time',
-                    distribution: 'liner',
-                    time: {
-                        displayFormat: "YYYY-MM-DD"
-                    },
-                    ticks: {
-                        source: 'data'
-                    }
-                }],
                 yAxes: [{
                     ticks: {
                         beginAtZero: true,
@@ -48,6 +46,9 @@ export default {
     }),
     computed: {
         isDataEmpty: function() {
+            if(typeof this.dataset === 'undefined'){
+                return true
+            }
             if(Object.keys(this.dataset).length === 0){
                 return true
             }else{
@@ -55,7 +56,7 @@ export default {
             }
         }
     },
-    created() {
+    mounted() {
         //labelを直近1ヶ月で設定
         const day_array = []
         const today     = new Date()
@@ -72,18 +73,46 @@ export default {
         chartGraph(){
             //時系列データの生成
             if(this.isDataEmpty) return false;
-            for( const [key, value] of Object.entries(this.dataset) ){
-                const format_date = this.formatDate(key)
+            this.chartData.datasets[0].data = []
+            // データのソート
+            const sortedDatasets = this.sortObjectByKey()
+            for( let data of sortedDatasets ){
+                const format_date = this.formatDate(data["date"])
                 this.chartData.datasets[0].data.push({
-                    y: value,
+                    y: data["num"],
                     x: format_date
                 })
             }
+            this.chartData.datasets[0].label = this.label
+            this.chartData.datasets[0].borderColor = this.calcBorderColor()
+            this.options.title.text = this.graphtitle
             this.renderChart(this.chartData, this.options)
+        },
+        sortObjectByKey(){
+            let keyArray = Object.keys(this.dataset)
+            keyArray.sort()
+            const sortedObject = keyArray.map(key => {
+                return {
+                    date: key,
+                    num: this.dataset[key]
+                }
+            })
+
+            return sortedObject
+        },
+        calcBorderColor(){
+            let r = Math.floor(Math.random() * 255);
+            let g = Math.floor(Math.random() * 255);
+            let b = Math.floor(Math.random() * 255);
+            let a = Math.random() * 1;
+            return `rgba(${r},${g},${b},${a})`
+
         },
         formatDate(non_format_date){
             const date    = new Date(non_format_date)
             const dateISO = moment(date.toISOString()).format('YYYY-MM-DD')
+            return dateISO
+            console.log(dateISO)
             //return date.toISOString().format()
         }
     },

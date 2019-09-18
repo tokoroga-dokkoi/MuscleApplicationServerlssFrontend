@@ -24,21 +24,21 @@
                     <myPieGraph ref="graph" :dataset="pieData"></myPieGraph>
                 </v-flex>
                 <v-flex xs6>
-                    <myCompleteGraph ref="completegraph" :dataset="lineData"></myCompleteGraph>
+                    <myCompleteGraph ref="completegraph" :dataset="lineData" :label="'Todo完了数'" :graphtitle="'Todo完了数推移'"></myCompleteGraph>
                 </v-flex>
             </v-layout>
             <v-layout row mt-4>
                 <v-flex xs12 d-flex>
-                    <mySelectBox :todos="completeTodos" :label="'トレーニングを選択'" @get="getWeightSetLine($event, training_name)"></mySelectBox>
+                    <mySelectBox :todos="completeTodos" :label="'トレーニングを選択'" @get="getTrendData($event, training_name)"></mySelectBox>
                 </v-flex>
             </v-layout>
 
             <v-layout align center justify-center row>
                 <v-flex xs6 >
-                    <myWeightGraph :datasets="weightData" v-show="isShowGraph"></myWeightGraph>
+                    <myCompleteGraph :dataset="weightData" :label="'重量'" :graphtitle="'重量推移'" v-show="isShowGraph"></myCompleteGraph>
                 </v-flex>
                 <v-flex xs6>
-                    <myWeightGraph :datasets="setData" v-show="isShowGraph"></myWeightGraph>
+                    <myCompleteGraph :dataset="setData" :label="'セット数'" :graphtitle="'セット数推移'" v-show="isShowGraph"></myCompleteGraph>
                 </v-flex>
             </v-layout>
         </v-container>
@@ -101,23 +101,8 @@ export default {
                 value: 'action'
             }
         ],
-        todos: [{
-            todo_id: "",
-            name: "",
-            weight: 0,
-            set: 0,
-            created_at: "",
-            clear_plan: ""
-        }],
-        completeTodos: [{
-            todo_id: "",
-            name: "",
-            weight: 0,
-            set: 0,
-            created_at: "",
-            clear_plan: "",
-            clear_data: ""
-        }],
+        todos: [],
+        completeTodos: [],
         pieData: {},
         lineData: {},
         training_name: "",
@@ -141,9 +126,8 @@ export default {
         const path     = '/todos'
         const user_info_storage_key = `CognitoIdentityServiceProvider.${process.env.VUE_APP_USER_POOL_WEB_CLIENT_ID}.LastAuthUser`
         const user_info = sessionStorage.getItem(`${user_info_storage_key}`)
-        console.log
         // Todo一覧を取得
-        AwsUtil.getAPI(api_name, `${path}/${user_info}`).then( (response) => {
+        AwsUtil.getAPI(api_name, `${path}`).then( (response) => {
             console.log(response.data)
             this.todos = response.data["not_complete"]
             this.completeTodos = response.data["complete"]
@@ -240,46 +224,31 @@ export default {
             this.completeDialog = true
         },
         afterComplete(todo){
-            // Todo一覧から削除
+            // データの更新
+            const updatePieData  = Object.assign({}, this.pieData)
+            const updateLineData = Object.assign({}, this.lineData)
+            updatePieData[todo.name]       = ( todo.name in this.pieData ) ? (this.pieData[todo.name] + 1) : 1
+            updateLineData[todo.clear_date] = ( todo.clear_date in this.lineData) ? (this.lineData[todo.clear_date] + 1) : 1
+            this.pieData  = Object.assign({}, updatePieData)
+            //折れ線グラフのデータは日付順に並び替える
+            this.lineData = Object.assign({}, updateLineData)
+            // データテーブルから削除する
             this.todos.splice(this.editIndex, 1)
-            //グラフ描画用データに追加
-            const todo_name    = todo.name
-            const search_index = this.dataSet.findIndex(item => item == todo.name)
-            const clear_date   = Date.new()
-            // 既存のデータに存在しない場合
-            if(search_index === -1){
-                //　円グラフ
-                this.dataLabel.push(todo_name)
-                this.dataSet.push(1)
-                // 折れ線グラフ
-                this.lineData[clear_date] = 1
-            // 既存のデータが存在する場合
-            }else{
-                //一致するデータラベルを探索
-            }
-            this.dataSet.push()
-            this.closeForm()
         },
-        getWeightSetLine(training_name){
+        getTrendData(training_name){
             if (this.isLoading) return;
-            this.weightData = {}
-            this.setData = {}
             this.isLoading = true
-            const url = '/api/v1/graph/search'
-            const options = {
-                params: {
-                    name: training_name
-                },
-                auth: true
+            const path     = '/analize/trend'
+            const payload  = {
+                name: training_name
             }
-            request.get(url, options).then( (response) => {
-                this.weightData = response.data.weight_data
-                this.setData    = response.data.set_data
+            AwsUtil.postAPI('', path, payload).then( (response) => {
+                this.weightData = Object.assign({}, response.item.weight)
+                this.setData    = Object.assign({}, response.item.set)
                 this.isLoading = false;
             }, (error) => {
                 console.log(error)
             })
-
         }
 
     }
