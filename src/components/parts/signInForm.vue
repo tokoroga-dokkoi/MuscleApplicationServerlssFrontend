@@ -10,7 +10,7 @@
                         <v-flex xs12>
                         <MyTextField
                             v-model="email"
-                            label="メールアドレス"
+                            label="メールアドレスもしくはユーザ名"
                             :rules="formInfo.emailRules"
                             :counter="100">
                         </MyTextField>
@@ -25,7 +25,7 @@
                     <v-btn medium color="primary" @click="userSignIn">
                         ログイン
                     </v-btn>
-                    <v-btn medium color="primary" @click="close">
+                    <v-btn medium color="primary" @click="close(false)">
                         閉じる
                     </v-btn>
                 </v-form>
@@ -46,7 +46,7 @@ export default {
         password:"",
         formInfo: {
             emailRules: [
-                v => !!v || "メールアドレスを入力してください",
+                v => !!v || "メールアドレスもしくはユーザ名を入力してください",
                 v => /^[-a-z0-9~!$%^&*_=+}{\'?]+(\.[-a-z0-9~!$%^&*_=+}{\'?]+)*@([a-z0-9_][-a-z0-9_]*(\.[-a-z0-9_]+)*\.(aero|arpa|biz|com|coop|edu|gov|info|int|mil|museum|name|net|org|pro|travel|mobi|[a-z][a-z])|([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}))(:[0-9]{1,5})?$/.test(v) || "メールアドレスが不正です"
             ],
             userPasswordRules: [
@@ -66,18 +66,20 @@ export default {
                     // Tokenをローカルに保存
                     const token = user.signInUserSession.idToken.jwtToken
                     localStorage.setItem("Authorization", token)
+                    this.email = ''
+                    this.password = ''
+                    this.close()
+                    this.$router.push('/mypage')
+                    this.$store.commit('message/setMessage', {'message': 'ログインに成功しました'}, {root: true})
+                    
                 })
-                this.$store.commit('message/setMessage', {'message': 'ログインに成功しました'}, {root: true})
-                this.$router.push('/mypage')
             } catch(e){
                 console.log(e)
+                this.close()
                 this.$store.commit('message/setMessage', {'message': 'ログインに失敗しました', 'type': 'error'}, {root: true})
             }
-            this.close()
         },
         close(){
-            this.email     = ''
-            this.password = ''
             this.$emit('close')
         }
     }

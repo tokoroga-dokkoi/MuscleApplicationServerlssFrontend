@@ -44,10 +44,19 @@ export function signIn(username, password){
     });
 }
 
-export function CurrentUser(){
+export async function CurrentUser(){
     return Auth.currentAuthenticatedUser()
 }
 
+export async function isLogedin(){
+    let state = await Auth.currentAuthenticatedUser().then( (user) => {
+        return Promise.resolve(true)
+    }).catch((error) => {
+        console.log(error)
+        return Promise.resolve(false)
+    })
+    return state
+}
 export function GetUserNameAccessToken(){
     CurrentUser().then( (response) => {
         user_name = response["username"]

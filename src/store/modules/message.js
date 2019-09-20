@@ -14,7 +14,6 @@ export default ({
             //フラッシュメッセージをstoreに保存する
             state.message = message
             state.type    = type || 'success'
-            console.log(state)
         },
         clearMessage(state){
             //フラッシュメッセージを削除する

@@ -127,7 +127,7 @@ export default {
         const user_info_storage_key = `CognitoIdentityServiceProvider.${process.env.VUE_APP_USER_POOL_WEB_CLIENT_ID}.LastAuthUser`
         const user_info = sessionStorage.getItem(`${user_info_storage_key}`)
         // Todo一覧を取得
-        AwsUtil.getAPI(api_name, `${path}`).then( (response) => {
+        AwsUtil.getAPI(api_name, `${path}`).then( response => {
             console.log(response.data)
             this.todos = response.data["not_complete"]
             this.completeTodos = response.data["complete"]
@@ -138,7 +138,7 @@ export default {
             this.pieData    = Object.assign({}, pie_data)
             //折れ線グラフ
             this.lineData   = Object.assign({}, line_data)
-        }, (error) => {
+        }).catch( error => {
             console.log(error)
             this.$store.commit('message/setMessage', {"message":"Todoの取得に失敗しました", "type":"error"}, {root: true})
         })

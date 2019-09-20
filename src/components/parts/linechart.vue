@@ -40,6 +40,21 @@ export default {
                         beginAtZero: true,
                         min: 0
                     }
+                }],
+                xAxes: [{
+                    type: 'time',
+                    time: {
+                        fomat: 'MM-DD',
+                        unit: 'day',
+                        displayFormats: {
+                            day: 'MM-DD'
+                        },
+                        tooltipFormat: 'll'
+                    },
+                    scaleLable:{
+                        display: true,
+                        labelString: 'Date'
+                    }
                 }]
             }
         }
@@ -64,7 +79,7 @@ export default {
         start_day.setMonth(today.getMonth() - 1)
         //繰り返し
         for(let day = start_day; day < today; day.setDate(day.getDate() + 1)){
-            const format_date = `${day.getFullYear()}-${day.getMonth()}-${day.getDate()}`
+            const format_date = `${day.getFullYear()}-${day.getMonth()+1}-${day.getDate()}`
             day_array.push(format_date)
         }
         this.chartData.labels = day_array

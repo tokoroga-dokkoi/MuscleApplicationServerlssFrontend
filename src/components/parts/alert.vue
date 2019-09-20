@@ -5,10 +5,9 @@
             dismissible
             :color="type"
             :icon="iconType"
-            v-if="getAlert"
-            @click="clearMessage"
+            v-model="alert"
         >
-            {{ message }}
+            {{ getAlert }}
         </v-alert>
     </div>
 </template>
@@ -34,17 +33,24 @@ export default {
             }
         },
         getAlert() {
-            if(this.$store.state.message.message){
-                return true
-            }
-            else{
-                return false
-            }
+            console.log(this.$store.getters['message/getMessage'])
+            return this.$store.getters['message/getMessage']
         },
     },
     methods: {
         clearMessage: function(){
-            this.$store.commit('message/clearMessage', {root: true})
+            this.$store.dispatch('message/clearMessage', {root: true})
+            this.alert=false
+        }
+    },
+    watch: {
+        getAlert (val, old){
+            this.alert = !val ? false: true
+        },
+        alert (val, old){
+            if(!val){
+                this.$store.commit('message/clearMessage', {root: true})
+            }
         }
     }
 }

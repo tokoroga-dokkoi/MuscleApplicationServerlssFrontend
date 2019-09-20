@@ -1,6 +1,7 @@
 <template>
   <v-app>
     <MyHeader />
+    <MyAlert />
     <v-content>
       <router-view />
     </v-content>

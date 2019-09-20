@@ -2,7 +2,6 @@
     <div id="content">
         <div id="hero">
             <v-img :src="image_src" class="white-text" >
-                <MyAlert />
                 <v-container fill-height fluid>
                     <v-layout fill-height align-center>
                         <v-flex xs12 flexbox>
