@@ -19,8 +19,7 @@ Amplify.configure({
         endpoints: [
             {
                 name: 'MuscleApi',
-                endpoint: "http://localhost:3000"
-                //endpoint: process.env.VUE_APP_API_GATEWAY_BASE_URL
+                endpoint: process.env.VUE_APP_API_GATEWAY_BASE_URL
             }
         ]
     }
