@@ -4,39 +4,28 @@
         :items="items"
         class="elevation-1"
     >
-        <template v-slot:body="{items}">
-            <tbody v-if="items.length > 0">
-                <tr v-for="item in items" :key="item.id">
-                    <td class="text-xs-right"> {{ item.name }} </td>
-                    <td class="text-xs-right"> {{ item.set }} </td>
-                    <td class="text-xs-right"> {{ item.weight }} </td>
-                    <td class="text-xs-right"> {{ item.created_at}}</td>
-                    <td class="text-xs-right"> {{ item.clear_plan}}</td>
-                    <td class="justify-center layout px-0" v-if="item.name">
-                        <v-icon
-                            small
-                            class="mr-2"
-                            @click="completeItem(item)"
-                        >
-                            mdi-clipboard-check
-                        </v-icon>
-                        <v-icon
-                            small
-                            class="mr-2"
-                            @click="editItem(item)"
-                        >
-                            mdi-tooltip-edit
-                        </v-icon>
-                        <v-icon
-                            small
-                            class="mr-2"
-                            @click="deleteItem(item)"
-                        >
-                            mdi-delete
-                        </v-icon>
-                    </td>
-                </tr>
-            </tbody>
+        <template v-slot:item.action="{item}">
+            <v-icon
+                small
+                class="mr-2"
+                @click="completeItem(item)"
+            >
+                mdi-clipboard-check
+            </v-icon>
+            <v-icon
+                small
+                class="mr-2"
+                @click="editItem(item)"
+            >
+                mdi-tooltip-edit
+            </v-icon>
+            <v-icon
+                small
+                class="mr-2"
+                @click="deleteItem(item)"
+            >
+                mdi-delete
+            </v-icon>
         </template>
     </v-data-table>
 </template>
@@ -52,7 +41,13 @@ export default {
     methods: {
         editItem: function(item){
             const index = this.items.indexOf(item)
-            this.$emit("edit", {"todo": item, "index": index})
+            // itemの日付フォーマットを再変換
+            let edit_item   = Object.assign({}, this.todos[index])
+            this.$emit("edit", {"todo": edit_item, "index": index})
+        },
+        updateItem: function(index, item){
+            this.items[index] = item
+            console.log(this.items[index])
         },
         deleteItem: function(item){
             const index = this.items.indexOf(item)
@@ -61,7 +56,7 @@ export default {
         completeItem: function(item){
             // tableの配置番号を追加
             const index         = this.items.indexOf(item)
-            this.$emit("complete", {"todo":item, "index": index})
+            this.$emit("complete", {"todo": item, "index": index})
         },
         convertDateFormat(){
             this.items = []

@@ -1,6 +1,5 @@
 <template>
-    <div>
-        <v-container>
+        <v-container> 
             <v-toolbar flat color="white">
                 <v-toolbar-title>ToDo一覧</v-toolbar-title>
                 <v-divider
@@ -18,13 +17,16 @@
             <openDialog :dialog="completeDialog" @close="closeForm">
                 <taskCompleteForm slot="content" :todo="todo" @complete="afterComplete($event, todo)" @close="closeForm"></taskCompleteForm>
             </openDialog>
-            <myDataTable :headers="headers" :todos="todos" @edit="editForm($event, todo)" @delete="deleteConfirm($event, todo)" @complete="completeTodo($event,todo)"></myDataTable>
-            <v-layout align-center justify-center row>
-                <v-flex xs6>
-                    <myPieGraph ref="graph" :dataset="pieData"></myPieGraph>
+            <myDataTable ref="table" :headers="headers" :todos="todos" @edit="editForm($event, todo)" @delete="deleteConfirm($event, todo)" @complete="completeTodo($event,todo)"></myDataTable>
+           
+            <v-layout row wrap>
+                <v-flex xs-12 md-6>
+                    <v-spacer></v-spacer>
+                    <myPieGraph class='chart' ref="graph" :dataset="pieData"></myPieGraph>
                 </v-flex>
-                <v-flex xs6>
-                    <myCompleteGraph ref="completegraph" :dataset="lineData" :label="'Todo完了数'" :graphtitle="'Todo完了数推移'"></myCompleteGraph>
+                <v-flex xs-12 md-6>
+                    <myCompleteGraph class='chart' ref="completegraph" :dataset="lineData" :label="'Todo完了数'" :graphtitle="'Todo完了数推移'"></myCompleteGraph>
+                    <v-spacer></v-spacer>
                 </v-flex>
             </v-layout>
             <v-layout row mt-4>
@@ -34,15 +36,14 @@
             </v-layout>
 
             <v-layout align center justify-center row>
-                <v-flex xs6 >
-                    <myCompleteGraph :dataset="weightData" :label="'重量'" :graphtitle="'重量推移'" v-show="isShowGraph"></myCompleteGraph>
+                <v-flex md-6 xs-12 m-auto>
+                    <myCompleteGraph class='chart' :dataset="weightData" :label="'重量'" :graphtitle="'重量推移'" v-show="isShowGraph"></myCompleteGraph>
                 </v-flex>
-                <v-flex xs6>
-                    <myCompleteGraph :dataset="setData" :label="'セット数'" :graphtitle="'セット数推移'" v-show="isShowGraph"></myCompleteGraph>
+                <v-flex md-6 xs-12 m-auto>
+                    <myCompleteGraph class='chart' :dataset="setData" :label="'セット数'" :graphtitle="'セット数推移'" v-show="isShowGraph"></myCompleteGraph>
                 </v-flex>
             </v-layout>
         </v-container>
-    </div>
 </template>
 <script>
 import Dialog from '../parts/openDialog'
@@ -184,7 +185,12 @@ export default {
             this.todos.push(todo)
         },
         updateTodo(todo){
-            Object.assign(this.todos[this.editIndex], todo)
+            //元データを更新
+            const index = this.editIndex
+            this.index  = -1
+            this.todos[index] = todo
+            //テーブルのデータを更新
+            this.$refs.table.updateItem(index, todo)
         },
         editForm(todoArgs){
             this.todo = Object.assign({}, todoArgs.todo)
@@ -254,4 +260,9 @@ export default {
     }
 }
 </script>
-
+<style scoped>
+.chart {
+    min-width: 300px;
+    max-width: 600px;
+}
+</style>

@@ -47,7 +47,6 @@ export default {
         formInfo: {
             emailRules: [
                 v => !!v || "メールアドレスもしくはユーザ名を入力してください",
-                v => /^[-a-z0-9~!$%^&*_=+}{\'?]+(\.[-a-z0-9~!$%^&*_=+}{\'?]+)*@([a-z0-9_][-a-z0-9_]*(\.[-a-z0-9_]+)*\.(aero|arpa|biz|com|coop|edu|gov|info|int|mil|museum|name|net|org|pro|travel|mobi|[a-z][a-z])|([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}))(:[0-9]{1,5})?$/.test(v) || "メールアドレスが不正です"
             ],
             userPasswordRules: [
                 v => !!v || "パスワードを入力してください",

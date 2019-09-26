@@ -30,7 +30,7 @@
                             </MyTextField>
 
                             <MyDateField
-                                v-model="todo.complete_plan_date"
+                                v-model="todo.clear_plan"
                                 label="完了予定日"
                             >
                             </MyDateField>
@@ -106,7 +106,7 @@ export default {
                 name: this.todo.name,
                 weight: this.todo.weight,
                 set: this.todo.set,
-                clear_plan: this.todo.complete_plan_date
+                clear_plan: this.todo.clear_plan
             }
             if(this.editFlg === -1){
                 this.newTask(body)
@@ -129,15 +129,21 @@ export default {
                 this.close()
             }
         },
-        updateTask(options){
+        async updateTask(options){
             //request
-            request.patch(`/api/v1/todo/${this.todo.todo_id}`, options).then( (response) => {
-                //更新内容を適用する
-                this.$store.commit('message/setMessage', {'message': '更新が完了しました'}, {root: true})
-                this.$emit("update", response.data)
-            }, (error) => {
-                this.$store.commit('message/setMessage', {'message': '更新に失敗しました', 'type': 'error'}, {root: true})
-            })
+            const path        = `/todos/${this.todo.id}`
+            const todo        = Object.assign({}, this.todo)
+            try{
+                await AwsUtil.putAPI(path, this.todo).then((response) => {
+                    this.$store.commit('message/setMessage', {'message': '更新が完了しました'}, {root: true})
+                    this.$emit("update", response.item)
+                })
+            } catch(e){
+                console.log(e)
+                this.$store.commit('message/setMessage', {'message': '更新に失敗しました', 'type':'error'}, {root: true})
+            }finally{
+                this.close()
+            }
         },
         close(){
             this.$emit("close")

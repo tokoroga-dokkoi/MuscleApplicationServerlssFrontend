@@ -89,7 +89,7 @@ export default {
                 comment: this.comment
             }
             // リクエスト
-            const path = `/todos/${this.todo.id}`
+            const path = `/todos/${this.todo.id}/complete`
             try{
                 AwsUtil.putAPI(path, body).then( (response) => {
                     // メッセージ出力
