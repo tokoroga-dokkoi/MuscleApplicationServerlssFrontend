@@ -19,14 +19,14 @@
                         v-model="group"
                         active-class="deep-purple--text text-accent-4"
                     >
-                        <v-list-item>
+                        <v-list-item @click="goIndex()">
                             <v-list-item-icon>
                                 <v-icon>mdi-home</v-icon>
                             </v-list-item-icon>
                             <v-list-item-title>Topページ</v-list-item-title>
                         </v-list-item>
 
-                        <v-list-item>
+                        <v-list-item @click="goMypage()">
                             <v-list-item-icon>
                                 <v-icon>mdi-face</v-icon>
                             </v-list-item-icon>
@@ -115,6 +115,13 @@ export default {
         this.isLogin()
     },
     methods: {
+        goIndex() {
+            this.$router.push('/')
+        },
+        goMypage() {
+            console.log("goMyapage")
+            this.$router.push('/mypage')
+        },
         isLogin() {
             AwsUtil.isLogedin().then( (res) => {
                 this.login = res
