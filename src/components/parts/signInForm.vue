@@ -68,9 +68,9 @@ export default {
                     this.email = ''
                     this.password = ''
                     this.close()
-                    this.$router.push('/mypage')
                     this.$store.commit('message/setMessage', {'message': 'ログインに成功しました'}, {root: true})
-                    
+                    this.$store.dispatch('session/setUserInfo', {root: true})
+                    this.$router.push('/mypage')
                 })
             } catch(e){
                 console.log(e)

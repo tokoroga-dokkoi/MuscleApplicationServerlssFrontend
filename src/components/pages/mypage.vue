@@ -125,11 +125,8 @@ export default {
         //url
         const api_name = 'MuscleApi'
         const path     = '/todos'
-        const user_info_storage_key = `CognitoIdentityServiceProvider.${process.env.VUE_APP_USER_POOL_WEB_CLIENT_ID}.LastAuthUser`
-        const user_info = sessionStorage.getItem(`${user_info_storage_key}`)
         // Todo一覧を取得
         AwsUtil.getAPI(api_name, `${path}`).then( response => {
-            console.log(response.data)
             this.todos = response.data["not_complete"]
             this.completeTodos = response.data["complete"]
             //グラフ描画

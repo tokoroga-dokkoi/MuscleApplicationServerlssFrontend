@@ -34,7 +34,7 @@
                         </v-list-item>
 
 
-                        <v-list-item>
+                        <v-list-item @click="goTimeline()">
                             <v-list-item-icon>
                                 <v-icon>mdi-twitter</v-icon>
                             </v-list-item-icon>
@@ -101,6 +101,7 @@
     </div>
 </template>
 <script>
+import store from '../../store/store'
 import Dialog from '../parts/openDialog'
 import UserLoginForm from '../parts/signInForm'
 import * as AwsUtil from '../../utils/AwsUtil'
@@ -115,12 +116,20 @@ export default {
         this.isLogin()
     },
     methods: {
+        clearMessage(){
+            this.$store.commit('message/clearMessage', {root: true})
+        },
         goIndex() {
+            this.clearMessage()
             this.$router.push('/')
         },
         goMypage() {
-            console.log("goMyapage")
+            this.clearMessage()
             this.$router.push('/mypage')
+        },
+        goTimeline() {
+            this.clearMessage()
+            this.$router.push('/timeline')
         },
         isLogin() {
             AwsUtil.isLogedin().then( (res) => {
