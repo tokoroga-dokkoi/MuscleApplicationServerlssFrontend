@@ -58,9 +58,30 @@
                 >
                     <v-icon class="mr-1">mdi-heart</v-icon>
                     <span class="subheading mr-2">{{ timeline.favo }}</span>
-                <div class="following-action" v-if="!isOwnTweet">
-                        <v-icon class="mr-1" v-if="timeline.Following" @click="unfollow(timeline.user_name)">mdi-account-minus</v-icon>
-                        <v-icon class="mr-1" v-else @click="follow(timeline.user_name)">mdi-account-plus</v-icon>
+                    <div class="following-action" v-if="!isOwnTweet">
+                        <v-icon class="mr-1" v-if="timeline.relation_id > 0" @click="unfollow(timeline)">mdi-account-minus</v-icon>
+                        <v-icon class="mr-1" v-else @click="follow(timeline)">mdi-account-plus</v-icon>
+                        <v-dialog
+                            v-model="dialog"
+                            hide-overlay
+                            persistent
+                            width="300"
+                        >
+                            <v-card
+                                color="primary"
+                                dark
+                            >
+                                <v-card-text>
+                                    フォロー処理中
+                                    <v-progress-linear
+                                        indeterminate
+                                        color="white"
+                                        class="mb-0"
+                                    >
+                                    </v-progress-linear>
+                                </v-card-text>
+                            </v-card>
+                        </v-dialog>
                     </div>
                 </v-row>
             </v-list-item>
@@ -78,6 +99,10 @@ export default {
         timeline: {
             type: Object,
             default: null
+        },
+        dialog: {
+            Type: Boolean,
+            default: false
         }
     },
     computed: {
@@ -94,11 +119,13 @@ export default {
         }
     },
     methods: {
-        follow(user_name) {
-            console.log(user_name)
+        follow(timeline) {
+            this.$emit('change')
+            this.$emit('follow', timeline)
         },
-        unfollow(user_name) {
-            console.log(user_name)
+        unfollow(timeline) {
+            this.$emit('change')
+            this.$emit('unfollow', timeline)
         }
     }
 }
