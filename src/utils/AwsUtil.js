@@ -125,4 +125,19 @@ export async function putAPI(path, payload){
 
 }
 
+export async function deleteAPI(path, payload){
+    const apiName = 'MuscleApi'
+    const user     = await Auth.currentAuthenticatedUser()
+    const id_token = user.signInUserSession.idToken.jwtToken
+    const headers = {
+        Authorization: id_token
+    }
+    const http_data = {
+        headers: headers,
+        body: payload
+    }
+
+    return API.del(apiName, path, http_data)
+}
+
 // Non export Function
