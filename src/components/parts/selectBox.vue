@@ -29,14 +29,10 @@ export default {
     watch: {
         todos: {
             immediate: true,
-            handler() {
-                const new_items = this.todos.map( function(todo) {
-                    return todo.name
-                }).filter( function(x, i, self){
-                    return self.indexOf(x) === i
-                })
-                this.items = new_items
-                this.value = new_items
+            handler(val, oldval) {
+                console.log(val)
+                this.items = val
+                this.value = val
             }
         }
     }

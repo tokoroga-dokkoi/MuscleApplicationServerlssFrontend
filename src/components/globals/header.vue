@@ -121,15 +121,15 @@ export default {
         },
         goIndex() {
             this.clearMessage()
-            this.$router.push('/')
+            this.$router.push('/', () => {}, () => {})
         },
         goMypage() {
             this.clearMessage()
-            this.$router.push('/mypage')
+            this.$router.push('/mypage', () => {}, () => {})
         },
         goTimeline() {
             this.clearMessage()
-            this.$router.push('/timeline')
+            this.$router.push('/timeline', () => {}, () => {})
         },
         isLogin() {
             AwsUtil.isLogedin().then( (res) => {

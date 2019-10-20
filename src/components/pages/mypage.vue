@@ -17,8 +17,8 @@
             <openDialog :dialog="completeDialog" @close="closeForm">
                 <taskCompleteForm slot="content" :todo="todo" @complete="afterComplete($event, todo)" @close="closeForm"></taskCompleteForm>
             </openDialog>
-            <myDataTable ref="table" :headers="headers" :todos="todos" @edit="editForm($event, todo)" @delete="deleteConfirm($event, todo)" @complete="completeTodo($event,todo)"></myDataTable>
-           
+            <myDataTable ref="table" :headers="headers" :todos="todos" @edit="editForm($event, todo)" @delete="deleteConfirm($event, todo)" @complete="completeTodo($event,todo)">
+            </myDataTable>
             <v-layout row wrap>
                 <v-flex xs-12 md-6>
                     <v-spacer></v-spacer>
@@ -61,14 +61,27 @@ export default {
     data: () => ({
         dialog: false,
         completeDialog: false,
-        todo: {
-            name: "",
-            weight: "",
-            set: "",
-            complete_plan_date: new Date().toISOString().substr(0,10),
-        },
+        todo: [],
         editIndex: -1,
         headers: [
+           {
+                text: "完了予定日",
+                sortable: true,
+                value: "clear_plan"
+            },
+            {
+                text: "メニュー数",
+                sortable: false,
+                value: "menu_num"
+            },
+            {
+                text: "操作",
+                align: 'center',
+                sortable: false,
+                value: 'action'
+            }
+        ],
+        subHeader: [
             {
                 text: "ToDo名",
                 align: "left",
@@ -89,17 +102,6 @@ export default {
                 text: "登録日",
                 sortable: true,
                 value: "created_at"
-            },
-            {
-                text: "完了予定日",
-                sortable: true,
-                value: "clear_plan"
-            },
-            {
-                text: "操作",
-                align: 'center',
-                sortable: false,
-                value: 'action'
             }
         ],
         todos: [],
@@ -128,6 +130,7 @@ export default {
         // Todo一覧を取得
         AwsUtil.getAPI(api_name, `${path}`).then( response => {
             this.todos = response.data["not_complete"]
+            // 完了済みデータの一覧
             this.completeTodos = response.data["complete"]
             //グラフ描画
             const pie_data  = response.data["pie"]
@@ -159,15 +162,12 @@ export default {
             this.editIndex = -1
             this.todo      = {
                 name: "",
-                weight: "",
-                set: "",
+                menu:"",
+                created_at: new Date().toISOString().substr(0,10),
                 complete_plan_date: new Date().toISOString().substr(0,10)
             }
             this.dialog         = false
             this.completeDialog = false
-        },
-        createDataTable(todos){
-            this.todos = todos
         },
         createLineData(datas){
             const line_data_object = {}
@@ -178,13 +178,12 @@ export default {
             return line_data_object
         },
         appendTodo(todo){
-            console.log(todo)
             this.todos.push(todo)
         },
         updateTodo(todo){
             //元データを更新
             const index = this.editIndex
-            this.index  = -1
+            this.editIndex  = -1
             this.todos[index] = todo
             //テーブルのデータを更新
             this.$refs.table.updateItem(index, todo)
@@ -230,13 +229,24 @@ export default {
             // データの更新
             const updatePieData  = Object.assign({}, this.pieData)
             const updateLineData = Object.assign({}, this.lineData)
-            updatePieData[todo.name]       = ( todo.name in this.pieData ) ? (this.pieData[todo.name] + 1) : 1
+            console.log(todo.menu)
+            //円グラフのデータを追加
+            for(let menu of todo.menu){
+                updatePieData[menu.name]       = ( menu.name in this.pieData ) ? (this.pieData[menu.name] + 1) : 1
+            }
             updateLineData[todo.clear_date] = ( todo.clear_date in this.lineData) ? (this.lineData[todo.clear_date] + 1) : 1
             this.pieData  = Object.assign({}, updatePieData)
             //折れ線グラフのデータは日付順に並び替える
             this.lineData = Object.assign({}, updateLineData)
             // データテーブルから削除する
             this.todos.splice(this.editIndex, 1)
+            // データを初期化する
+            this.todo      = {
+                name: "",
+                menu:"",
+                created_at: new Date().toISOString().substr(0,10),
+                complete_plan_date: new Date().toISOString().substr(0,10)
+            }
         },
         getTrendData(training_name){
             if (this.isLoading) return;

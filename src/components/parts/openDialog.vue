@@ -3,6 +3,7 @@
         <v-dialog
             :value="dialog"
             persistent
+            scrollable
             width="400"
             @input="closeDialog"
         >

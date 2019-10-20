@@ -5,7 +5,7 @@
                 large
                 left
             >
-                mdi-twitter
+                mdi-dumbbell
             </v-icon>
             <span class="title font-weight-light">トレーニング記録</span>
         </v-card-title>
@@ -14,39 +14,21 @@
                 {{ timeline.comment }}
             </div>
         </v-card-text>
-        <v-list-item>
-            <v-list-item-icon>
-                <v-icon>mdi-run</v-icon>
-            </v-list-item-icon>
-            <v-list-item-title>
-                メニュー名
-            </v-list-item-title>
-            <v-list-item-subtitle>
-                {{ timeline.name}}
-            </v-list-item-subtitle>
-        </v-list-item>
-        <v-list-item>
-            <v-list-item-icon>
-                <v-icon>mdi-weight-kilogram</v-icon>
-            </v-list-item-icon>
-            <v-list-item-title>
-                重量
-            </v-list-item-title>
-            <v-list-item-subtitle>
-                {{ timeline.weight }}
-            </v-list-item-subtitle>
-        </v-list-item>
-        <v-list-item>
-            <v-list-item-icon>
-                <v-icon>mdi-numeric</v-icon>
-            </v-list-item-icon>
-            <v-list-item-title>
-                セット数
-            </v-list-item-title>
-            <v-list-item-subtitle>
-                {{ timeline.set }}
-            </v-list-item-subtitle>
-        </v-list-item>
+        <v-list class="transparent">
+            <v-list-item
+                v-for="(menu,index) in timeline.menu"
+                :key="index"
+            >
+                <v-list-item-icon>
+                    <v-icon>mdi-numeric-{{ index+1 }}-box-outline</v-icon>
+                </v-list-item-icon>
+                <v-list-item-title>{{ menu.name }}</v-list-item-title>
+                <v-list-item-subtitle class="text-right">
+                    <p> {{ menu.weight}}KG</p>
+                    <p> {{ menu.set }}セット</p>
+                </v-list-item-subtitle>
+            </v-list-item>
+        </v-list>
         <v-card-actions>
             <v-list-item class="grow">
                 <v-list-item-content>

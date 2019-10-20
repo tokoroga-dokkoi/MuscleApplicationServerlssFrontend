@@ -1,7 +1,7 @@
 <template>
     <v-container>
         <h1>Timeline表示</h1>
-        <div v-for="timeline in timelines" :key="timeline.id">
+        <div v-for="timeline in timelines" :key="timeline.id" class="mb-2">
             <TweetPost :timeline="timeline" :dialog="dialog" @change="changeDialogStatus()" @follow="followUser($event, timeline)" @unfollow="unfollowUser($event, timeline)"></TweetPost>
         </div>
     </v-container>
