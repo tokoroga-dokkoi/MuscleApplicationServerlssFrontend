@@ -1,4 +1,4 @@
-# myproject
+# Frontend Service for MyApp
 
 ## Project setup
 ```
@@ -15,19 +15,9 @@ yarn run serve
 yarn run build
 ```
 
-### Run your tests
-```
-yarn run test
-```
-
 ### Lints and fixes files
 ```
 yarn run lint
-```
-
-### Run your unit tests
-```
-yarn run test:unit
 ```
 
 ### Customize configuration
